@@ -1,0 +1,158 @@
+gant.php
+<?php
+session_start();
+require_once("../includes/dashboard.php");
+
+if (!isset($_SESSION['usuario_id'])) {
+    header("Location: index.php");
+    exit();
+}
+
+$id_proyecto = isset($_GET['id_proyecto']) ? $_GET['id_proyecto'] : null;
+
+if ($id_proyecto === null) {
+    echo "No se ha proporcionado un ID de proyecto.";
+    exit();
+}
+
+
+$sql_proyecto = "SELECT * FROM proyectos WHERE id = ?";
+$stmt = $conexion->prepare($sql_proyecto);
+if ($stmt === false) {
+    echo "Error al preparar la declaración SQL.";
+    exit();
+}
+
+$stmt->bind_param("i", $id_proyecto);
+$stmt->execute();
+$result_proyecto = $stmt->get_result();
+
+if ($result_proyecto->num_rows > 0) {
+    $proyecto = $result_proyecto->fetch_assoc();
+} else {
+    echo "No se encontró el proyecto.";
+    exit();
+}
+?>
+<--
+Resto html/logica
+-->
+</script>
+function loadSprints() {
+    fetch('../gant/get_sprint.php')  
+        .then(response => response.json())
+        .then(data => {
+            if (Array.isArray(data.data)) {
+                const sprintSelect = document.getElementById('tareaSprintId');
+                sprintSelect.innerHTML = ''; 
+
+                data.data.forEach(sprint => {
+                    const option = document.createElement('option');
+                    option.value = sprint.id;
+                    option.text = sprint.text;  
+                    option.setAttribute('data-fecha-inicio', sprint.start_date);
+                    option.setAttribute('data-fecha-fin', sprint.end_date);
+
+                    sprintSelect.appendChild(option);
+                });
+
+                if (sprintSelect.options.length > 0) {
+                    setFechaLimits(sprintSelect.options[0]);
+                }
+            } else {
+                console.error('No se encontraron sprints válidos');
+            }
+        })
+        .catch(error => {
+            console.error('Error al cargar los sprints:', error);
+        });
+}
+
+function loadData() {
+    Promise.all([
+        fetch('../gant/get_sprint.php').then(response => response.json()),
+        fetch('../gant/get_task.php').then(response => response.json())
+    ]).then(([sprintsData, tasksData]) => {
+        if (Array.isArray(sprintsData.data) && Array.isArray(tasksData.data)) {
+            
+            let sprintFechasMap = {};
+            sprintsData.data.forEach(sprint => {
+                sprintFechasMap[sprint.id] = {
+                    fechaInicio: sprint.start_date,
+                    fechaFin: sprint.end_date
+                };
+            });
+
+            tasksData.data.forEach(task => {
+                if (task.sprint_id && sprintFechasMap[task.sprint_id]) {
+                    let sprintFechas = sprintFechasMap[task.sprint_id];
+
+                    if (new Date(task.start_date) < new Date(sprintFechas.fechaInicio)) {
+                        task.start_date = sprintFechas.fechaInicio;
+                    }
+
+                    if (new Date(task.end_date) > new Date(sprintFechas.fechaFin)) {
+                        task.end_date = sprintFechas.fechaFin;
+                    }
+                }
+            });
+
+            let data = { data: [...sprintsData.data, ...tasksData.data] };
+            gantt.parse(data);  
+        } else {
+            console.error('Datos de sprints o tareas no válidos');
+        }
+    }).catch(error => {
+        console.error('Error al cargar los datos:', error);
+    });
+}
+</script</>
+
+get_sprint.php
+<?php
+header('Content-Type: application/json');
+require_once('../includes/conexion.php');
+
+if ($conexion->connect_error) {
+    die("Connection failed: " . $conexion->connect_error);
+}
+
+$proyecto_id = isset($_GET['proyecto_id']) ? intval($_GET['proyecto_id']) : null;
+
+$query = "SELECT id AS id, nombre AS text, descripcion, fecha_inicio AS start_date, fecha_fin AS end_date, estado_id, proyecto_id, 'sprint' AS type FROM sprints WHERE 1=1";
+
+if (!is_null($proyecto_id)) {
+    $query .= " AND proyecto_id = " . $proyecto_id;
+}
+
+$result = $conexion->query($query);
+
+$sprints = [];
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $sprints[] = $row;
+    }
+}
+
+echo json_encode(['data' => $sprints]);
+
+$conexion->close();
+?>
+get_task.php
+<?php
+header('Content-Type: application/json');
+require_once('../includes/conexion.php');
+
+$query = "SELECT id AS id, titulo AS text, descripcion, estado_id, fecha_inicio AS start_date, fecha_fin AS end_date, sprint_id AS parent, 'task' AS type FROM tareas";
+$result = $conexion->query($query);
+
+if ($result) {
+    $tasks = $result->fetch_all(MYSQLI_ASSOC);
+    echo json_encode(['data' => $tasks]);
+} else {
+    echo json_encode(['data' => []]);
+}
+
+$conexion->close();
+?>
