@@ -13,12 +13,14 @@ $materia = isset($_GET['materia']) ? $_GET['materia'] : '';
 
 if (empty($materia)) {
     echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Materia no especificada.'
-            }).then(function() {
-                window.location.href = 'index.php';
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Materia no especificada.'
+                }).then(function() {
+                    window.location.href = 'index.php';
+                });
             });
           </script>";
     exit();
@@ -33,12 +35,14 @@ $result_materia = $conexion->query($sql_materia);
 
 if ($result_materia === false) {
     echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Error en la consulta de materia: " . $conexion->error . "'
-            }).then(function() {
-                window.location.href = 'index.php';
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error en la consulta de materia: " . $conexion->error . "'
+                }).then(function() {
+                    window.location.href = 'index.php';
+                });
             });
           </script>";
     exit();
@@ -71,12 +75,14 @@ if ($result_materia->num_rows > 0) {
 
     if ($result_curso === false) {
         echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error en la consulta del curso: " . $conexion->error . "'
-                }).then(function() {
-                    window.location.href = 'index.php';
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error en la consulta del curso: " . $conexion->error . "'
+                    }).then(function() {
+                        window.location.href = 'index.php';
+                    });
                 });
               </script>";
         exit();
@@ -87,12 +93,14 @@ if ($result_materia->num_rows > 0) {
         $curso_id = $row_curso['curso_id'];
     } else {
         echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'No se encontró el ID del curso para la materia.'
-                }).then(function() {
-                    window.location.href = 'index.php';
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se encontró el ID del curso para la materia.'
+                    }).then(function() {
+                        window.location.href = 'index.php';
+                    });
                 });
               </script>";
         exit();
@@ -110,43 +118,47 @@ if ($result_materia->num_rows > 0) {
 
     if ($result_alumnos === false) {
         echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error en la consulta de alumnos: " . $conexion->error . "'
-                }).then(function() {
-                    window.location.href = 'index.php';
+                document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error en la consulta de alumnos: " . $conexion->error . "'
+                    }).then(function() {
+                        window.location.href = 'index.php';
+                    });
                 });
               </script>";
         exit();
     }
-  // Manejo del formulario de creación de proyecto
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $nombre = $_POST['nombre'];
-    $objetivo = $_POST['objetivo'];
-    $tiene_salida = $_POST['tiene_salida'];
-    $fecha_inicio = $_POST['fecha_inicio'];
-    $fecha_fin = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null;
-    $tiene_pm = isset($_POST['tiene_project_manager']) ? true : false;
-    $project_manager = $tiene_pm ? $_POST['project_manager'] : $dni_profesor; // Usar el DNI del profesor si no hay PM
-    $integrantes = $_POST['integrantes'];
+  
+    // Manejo del formulario de creación de proyecto
+    if ($_SERVER["REQUEST_METHOD"] == "POST") {
+        $nombre = $_POST['nombre'];
+        $objetivo = $_POST['objetivo'];
+        $tiene_salida = $_POST['tiene_salida'];
+        $fecha_inicio = $_POST['fecha_inicio'];
+        $fecha_fin = isset($_POST['fecha_fin']) ? $_POST['fecha_fin'] : null;
+        $tiene_pm = isset($_POST['tiene_project_manager']) ? true : false;
+        $project_manager = $tiene_pm ? $_POST['project_manager'] : $dni_profesor;
+        $integrantes = $_POST['integrantes'];
 
-    // Validar si el Project Manager seleccionado también está en los integrantes
-    if ($tiene_pm && in_array($project_manager, $integrantes)) {
-        echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'El Project Manager no puede ser también un integrante.'
-                }).then(function() {
-                    window.location.href = 'index.php';
-                });
-              </script>";
-        exit();
-    }
+        // Validar si el Project Manager seleccionado también está en los integrantes
+        if ($tiene_pm && in_array($project_manager, $integrantes)) {
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'El Project Manager no puede ser también un integrante.'
+                        }).then(function() {
+                            window.location.href = 'index.php';
+                        });
+                    });
+                  </script>";
+            exit();
+        }
 
-    // Continuar con la lógica de creación de proyecto...
-
+        // Continuar con la lógica de creación de proyecto...
 
         // Verifica si el cupof existe en la tabla cupof
         $sql_cupof = "SELECT cupof FROM cupof WHERE id_materias = $materia_id";
@@ -156,159 +168,106 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $row_cupof = $result_cupof->fetch_assoc();
             $cupof = $row_cupof['cupof'];
 
-            // Insertar el nuevo proyecto en la base de datos
-// Insertar el nuevo proyecto en la base de datos con el estado "En proceso" (ID = 1)
-$sql_proyecto = "INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, cupof, objetivo, tiene_salida, project_manager_id, creador_id, etapa_general) 
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // Insertar el nuevo proyecto en la base de datos con el estado "En proceso" (ID = 1)
+            $sql_proyecto = "INSERT INTO proyectos (nombre, descripcion, fecha_inicio, fecha_fin, cupof, objetivo, tiene_salida, project_manager_id, creador_id, etapa_general) 
+                             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-$stmt_proyecto = $conexion->prepare($sql_proyecto);
+            $stmt_proyecto = $conexion->prepare($sql_proyecto);
 
-if ($stmt_proyecto === false) {
-    echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Error en la preparación de la consulta de proyectos: " . $conexion->error . "'
-            }).then(function() {
-                window.location.href = 'index.php';
-            });
-          </script>";
-    exit();
-}
+            if ($stmt_proyecto === false) {
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Error en la preparación de la consulta de proyectos: " . $conexion->error . "'
+                            }).then(function() {
+                                window.location.href = 'index.php';
+                            });
+                        });
+                      </script>";
+                exit();
+            }
 
-// Asignar el valor "En proceso" (ID = 1) a la columna etapa_general
-$estado_inicial = 1;
-$stmt_proyecto->bind_param('ssssssssii', $nombre, $objetivo, $fecha_inicio, $fecha_fin, $cupof, $objetivo, $tiene_salida, $project_manager, $dni_profesor, $estado_inicial);
+            $estado_inicial = 1;
+            $stmt_proyecto->bind_param('ssssssssii', $nombre, $objetivo, $fecha_inicio, $fecha_fin, $cupof, $objetivo, $tiene_salida, $project_manager, $dni_profesor, $estado_inicial);
 
-if ($stmt_proyecto->execute()) {
-    $proyecto_id = $stmt_proyecto->insert_id;
+            if ($stmt_proyecto->execute()) {
+                $proyecto_id = $stmt_proyecto->insert_id;
 
-    // Insertar los integrantes
-    foreach ($integrantes as $integrante) {
-        $sql_integrantes_alumno = "INSERT INTO proyectointegrantes (proyecto_id, alumno_id) 
-                                   VALUES (?, ?)";
-        $stmt_integrantes_alumno = $conexion->prepare($sql_integrantes_alumno);
+                // Insertar los integrantes
+                foreach ($integrantes as $integrante) {
+                    $sql_integrantes_alumno = "INSERT INTO proyectointegrantes (proyecto_id, alumno_id) 
+                                               VALUES (?, ?)";
+                    $stmt_integrantes_alumno = $conexion->prepare($sql_integrantes_alumno);
 
-        if ($stmt_integrantes_alumno === false) {
-            echo "<script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error en la preparación de la consulta de integrantes: " . $conexion->error . "'
-                    }).then(function() {
-                        window.location.href = 'index.php';
-                    });
-                  </script>";
-            exit();
-        }
+                    if ($stmt_integrantes_alumno === false) {
+                        echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Error en la preparación de la consulta de integrantes: " . $conexion->error . "'
+                                    }).then(function() {
+                                        window.location.href = 'index.php';
+                                    });
+                                });
+                              </script>";
+                        exit();
+                    }
 
-        $stmt_integrantes_alumno->bind_param('ii', $proyecto_id, $integrante);
+                    $stmt_integrantes_alumno->bind_param('ii', $proyecto_id, $integrante);
 
-        if (!$stmt_integrantes_alumno->execute()) {
-            echo "<script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al insertar integrante: " . $stmt_integrantes_alumno->error . "'
-                    }).then(function() {
-                        window.location.href = 'index.php';
-                    });
-                  </script>";
-        }
+                    if (!$stmt_integrantes_alumno->execute()) {
+                        echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Error',
+                                        text: 'Error al insertar integrante: " . $stmt_integrantes_alumno->error . "'
+                                    }).then(function() {
+                                        window.location.href = 'index.php';
+                                    });
+                                });
+                              </script>";
+                    }
 
-        $stmt_integrantes_alumno->close();
-    }
+                    $stmt_integrantes_alumno->close();
+                }
 
-    echo "<script>
-            Swal.fire({
-                icon: 'success',
-                title: 'Éxito',
-                text: 'Proyecto creado exitosamente.'
-            }).then(function() {
-                window.location.href = 'index.php';
-            });
-          </script>";
-} else {
-    echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Error al crear el proyecto: " . $stmt_proyecto->error . "'
-            }).then(function() {
-                window.location.href = 'index.php';
-            });
-          </script>";
-}
-
-$stmt_proyecto->close();
-
-        } else {
-            echo "<script>
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'No se encontró un cupof válido para esta materia.'
-                    }).then(function() {
-                        window.location.href = 'index.php';
-                    });
-                  </script>";
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Éxito',
+                                text: 'El proyecto fue creado exitosamente.'
+                            }).then(function() {
+                                window.location.href = 'materias_profesor.php';
+                            });
+                        });
+                      </script>";
+            } else {
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Error al crear el proyecto: " . $stmt_proyecto->error . "'
+                            }).then(function() {
+                                window.location.href = 'index.php';
+                            });
+                        });
+                      </script>";
+            }
+            $stmt_proyecto->close();
         }
     }
-
-    // Consulta para mostrar proyectos existentes
-$sql_proyectos = "
-SELECT 
-    p.nombre AS nombre_proyecto,
-    p.descripcion,
-    p.fecha_inicio,
-    p.fecha_fin,
-    ep.nombre AS estado_proyecto
-FROM 
-    proyectos p
-INNER JOIN 
-    cupof c ON p.cupof = c.cupof
-INNER JOIN 
-    materias m ON c.id_materias = m.id
-INNER JOIN 
-    revista r ON c.cupof = r.cupof
-INNER JOIN 
-    estados_proyectos ep ON p.etapa_general = ep.id
-WHERE 
-    r.dni_personal = '$dni_profesor' AND 
-    m.nombre = '$materia' AND
-    (p.fecha_fin IS NULL OR p.fecha_fin >= CURDATE())
-ORDER BY 
-    p.fecha_inicio DESC;
-";
-
-
-    $result_proyectos = $conexion->query($sql_proyectos);
-
-    if ($result_proyectos === false) {
-        echo "<script>
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error en la consulta: " . $conexion->error . "'
-                }).then(function() {
-                    window.location.href = 'index.php';
-                });
-              </script>";
-        exit();
-    }
-} else {
-    echo "<script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Materia no encontrada.'
-            }).then(function() {
-                window.location.href = 'index.php';
-            });
-          </script>";
-    exit();
 }
 ?>
+
+<!-- Asegúrate de incluir las librerías de SweetAlert -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 
 

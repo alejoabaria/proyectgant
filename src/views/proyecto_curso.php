@@ -388,7 +388,7 @@ $stmt_proyecto->close();
             echo "<td>" . htmlspecialchars($row_proyecto['fecha_inicio']) . "</td>";
             echo "<td>" . htmlspecialchars($row_proyecto['fecha_fin']) . "</td>";
             echo "<td style='color: $color_estado;'>" . htmlspecialchars($estado_proyecto) . "</td>";
-            echo "<td><a href='gant.php?id_proyecto=" . urlencode($row_proyecto['id']) . "' class='btn btn-primary'>Ver Más</a></td>";
+            echo "<td><a href='maestros_panel.php?id_proyecto=" . urlencode($row_proyecto['id']) . "' class='btn btn-primary'>Ver Más</a></td>";
             echo "</tr>";
         }
     }
