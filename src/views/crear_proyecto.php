@@ -18,6 +18,10 @@ if (empty($materia)) {
                     icon: 'error',
                     title: 'Error',
                     text: 'Materia no especificada.'
+                     }).then(function() {
+                    setTimeout(function() {
+                        window.location.href = 'materias_profesor.php';
+                    }, 1000);
                 }).then(function() {
                     window.location.href = 'index.php';
                 });
@@ -150,6 +154,10 @@ if ($result_materia->num_rows > 0) {
                             icon: 'error',
                             title: 'Error',
                             text: 'El Project Manager no puede ser también un integrante.'
+                                                 }).then(function() {
+                    setTimeout(function() {
+                        window.location.href = 'materias_profesor.php';
+                    }, 1000);
                         }).then(function() {
                             window.location.href = 'index.php';
                         });
@@ -241,6 +249,7 @@ if ($result_materia->num_rows > 0) {
                                 icon: 'success',
                                 title: 'Éxito',
                                 text: 'El proyecto fue creado exitosamente.'
+
                             }).then(function() {
                                 window.location.href = 'materias_profesor.php';
                             });

@@ -41,6 +41,8 @@ if ($result_proyecto->num_rows > 0) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Diagrama de Gantt</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdn.dhtmlx.com/gantt/edge/dhtmlxgantt.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -549,14 +551,36 @@ document.getElementById('sprintForm').addEventListener('submit', function (event
       .then(data => {
           if (data.success) {
               $('#addSprintModal').modal('hide'); // Asegúrate de que el ID sea correcto
-              loadData();
+              loadData(); // Cargar los datos actualizados
+
+              // Mostrar SweetAlert de éxito
+              Swal.fire({
+                  title: 'Éxito!',
+                  text: 'El sprint se ha añadido correctamente.',
+                  icon: 'success',
+                  confirmButtonText: 'Aceptar'
+              });
           } else {
-              alert('Error: ' + data.message);
+              // Mostrar SweetAlert de error
+              Swal.fire({
+                  title: 'Error!',
+                  text: data.message,
+                  icon: 'error',
+                  confirmButtonText: 'Aceptar'
+              });
           }
       }).catch(error => {
           console.error('Error:', error);
+          // Mostrar SweetAlert de error en caso de un fallo en la petición
+          Swal.fire({
+              title: 'Error!',
+              text: 'Ocurrió un error al intentar agregar el sprint.',
+              icon: 'error',
+              confirmButtonText: 'Aceptar'
+          });
       });
 });
+
 
 document.getElementById('tareaSprintId').addEventListener('change', function() {
     const selectedOption = this.options[this.selectedIndex];
@@ -617,7 +641,7 @@ $(document).ready(function() {
 });
 
 // Código para el formulario
-document.getElementById('tareaForm').addEventListener('submit', function(event) {
+document.getElementById('tareaForm').addEventListener('submit', function(event) { 
     event.preventDefault();
 
     let tareaData = {
@@ -627,7 +651,6 @@ document.getElementById('tareaForm').addEventListener('submit', function(event) 
         fecha_fin: document.getElementById('tareaFechaFin').value,
         estado_id: document.getElementById('tareaEstadoId').value,
         sprint_id: document.getElementById('tareaSprintId').value,
-        // Obtiene los valores seleccionados como un array
         asignado_a: $('#asignadoA').val() // Cambiado para obtener múltiples selecciones
     };
 
@@ -641,52 +664,104 @@ document.getElementById('tareaForm').addEventListener('submit', function(event) 
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            $('#addTareaModal').modal('hide');
-            loadData();  
+            $('#addTareaModal').modal('hide'); // Cerrar el modal
+            loadData();  // Cargar los datos actualizados
+
+            // Mostrar SweetAlert de éxito
+            Swal.fire({
+                title: 'Éxito!',
+                text: 'La tarea se ha añadido correctamente.',
+                icon: 'success',
+                confirmButtonText: 'Aceptar'
+            });
         } else {
-            alert('Error: ' + data.message);
+            // Mostrar SweetAlert de error
+            Swal.fire({
+                title: 'Error!',
+                text: data.message,
+                icon: 'error',
+                confirmButtonText: 'Aceptar'
+            });
         }
     })
     .catch(error => {
         console.error('Error:', error);
+        // Mostrar SweetAlert de error en caso de un fallo en la petición
+        Swal.fire({
+            title: 'Error!',
+            text: 'Ocurrió un error al intentar agregar la tarea.',
+            icon: 'error',
+            confirmButtonText: 'Aceptar'
+        });
     });
 });
 
 function eliminarTarea() {
     const tareaId = document.getElementById('editTareaId').value;
 
-    if (confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
-        fetch('../gant/eliminar.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ tarea_id: tareaId })
-        })
-        .then(response => response.text()) // Cambiar a .text() para ver el contenido de la respuesta
-.then(data => {
-    console.log(data); // Ver qué devuelve realmente el servidor
-    let jsonData;
-    try {
-        jsonData = JSON.parse(data);
-        if (jsonData.success) {
-            alert('Tarea eliminada correctamente');
-            location.reload(); // Recargar la página para reflejar los cambios
-        } else {
-            alert('Error: ' + jsonData.message);
+    // Mostrar SweetAlert para confirmar la eliminación
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¡No podrás revertir esto!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminarla',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('../gant/eliminar.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tarea_id: tareaId })
+            })
+            .then(response => response.text()) // Cambiar a .text() para ver el contenido de la respuesta
+            .then(data => {
+                console.log(data); // Ver qué devuelve realmente el servidor
+                let jsonData;
+                try {
+                    jsonData = JSON.parse(data);
+                    if (jsonData.success) {
+                        // Mostrar SweetAlert de éxito
+                        Swal.fire(
+                            'Eliminada!',
+                            'La tarea ha sido eliminada correctamente.',
+                            'success'
+                        ).then(() => {
+                            location.reload(); // Recargar la página para reflejar los cambios
+                        });
+                    } else {
+                        // Mostrar SweetAlert de error
+                        Swal.fire(
+                            'Error!',
+                            jsonData.message,
+                            'error'
+                        );
+                    }
+                } catch (e) {
+                    console.error('Error de JSON:', e, 'Respuesta del servidor:', data);
+                    Swal.fire(
+                        'Error!',
+                        'Hubo un problema con la respuesta del servidor.',
+                        'error'
+                    );
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire(
+                    'Error!',
+                    'Ocurrió un error al intentar eliminar la tarea.',
+                    'error'
+                );
+            });
         }
-    } catch (e) {
-        console.error('Error de JSON:', e, 'Respuesta del servidor:', data);
-        alert('Hubo un problema con la respuesta del servidor.');
-    }
-})
-.catch(error => {
-    console.error('Error:', error);
-    alert('Ocurrió un error al intentar eliminar la tarea.');
-});
-
-    }
+    });
 }
+
 
 document.getElementById('editSprintForm').addEventListener('submit', function (event) {
     event.preventDefault();
@@ -703,24 +778,53 @@ document.getElementById('editSprintForm').addEventListener('submit', function (e
 
     console.log("Datos a enviar:", sprintData); // Agrega esta línea para depuración
 
-    fetch('../gant/update_sprint.php', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(sprintData)
-    }).then(response => response.json())
-      .then(data => {
-          if (data.status === 'success') {
-              $('#editSprintModal').modal('hide');
-              loadData();
-          } else {
-              alert('Error: ' + data.message);
-          }
-      }).catch(error => {
-          console.error('Error:', error);
-      });
+    // Mostrar SweetAlert de confirmación
+    Swal.fire({
+        title: '¿Estás seguro?',
+        text: "¿Quieres guardar los cambios en el sprint?",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, guardar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('../gant/update_sprint.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(sprintData)
+            }).then(response => response.json())
+              .then(data => {
+                  if (data.status === 'success') {
+                      $('#editSprintModal').modal('hide');
+                      loadData();
+                      Swal.fire(
+                          'Guardado!',
+                          'Los cambios han sido guardados.',
+                          'success'
+                      );
+                  } else {
+                      Swal.fire(
+                          'Error!',
+                          data.message,
+                          'error'
+                      );
+                  }
+              }).catch(error => {
+                  console.error('Error:', error);
+                  Swal.fire(
+                      'Error!',
+                      'Ocurrió un error al intentar guardar los cambios.',
+                      'error'
+                  );
+              });
+        }
+    });
 });
+
 
 document.getElementById('editTareaForm').addEventListener('submit', function (event) {
     event.preventDefault();
